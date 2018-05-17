@@ -23,6 +23,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $borrowLogs = auth()->user()->borrowLogs()->where('is_returned',0)->get();
+        return view('home')->with(compact('borrowLogs'));
     }
 }

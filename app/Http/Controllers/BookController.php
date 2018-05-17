@@ -9,6 +9,7 @@ use Yajra\DataTables\DataTables;
 use App\Book;
 use App\Author;
 use App\BorrowLog;
+use App\Exceptions\BookException;
 use Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -155,17 +156,34 @@ class BookController extends Controller
         try {
             $book = Book::findOrFail($id);
 
-            BorrowLog::create([
-                'user_id' => auth()->user()->id,
-                'book_id' => $book->id,
-            ]);
-
+            // BorrowLog::create([
+            //     'user_id' => auth()->user()->id,
+            //     'book_id' => $book->id,
+            // ]);
+            auth()->user()->borrow($book);
             session()->flash('success','Berhasil meminjam buku '.$book->title);
+        }catch(BookException $e){
+            session()->flash('fail',$e->getMessage());
         }catch(ModelNotFoundException $e){
             session()->flash('fail','Buku tidak ditemukan');
-
         }
 
         return redirect('/');
+    }
+
+    public function return($book_id)
+    {
+        $borrowLog = BorrowLog::where('user_id', auth()->user()->id)
+                                ->where('book_id', $book_id)
+                                ->where('is_returned',0)
+                                ->first();
+        if($borrowLog){
+            $borrowLog->is_returned = true;
+            $borrowLog->save();
+        }
+
+        session()->flash('success','Buku berhasil di kembalikan');
+
+        return redirect('/home');
     }
 }

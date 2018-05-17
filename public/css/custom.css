@@ -1,3 +1,16 @@
 .form-inline{
 	display: inline;
 }
+
+fieldset {
+    border: solid 1px #DDD !important;
+    padding: 0 10px 10px 10px;
+    border-bottom: none;
+}
+
+legend {
+    width: auto !important;
+    border: none;
+    font-size: 14px;
+    padding: 0px 3px;
+}
