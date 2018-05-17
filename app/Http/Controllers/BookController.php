@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use File;
 use Yajra\DataTables\Html\Builder;
 use Yajra\DataTables\DataTables;
 use App\Book;
 use App\Author;
+use App\BorrowLog;
+use Auth;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class BookController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index(Request $request, Builder $htmlBuilder)
     {
         if($request->ajax()){
@@ -39,69 +39,133 @@ class BookController extends Controller
         return view('books.index')->with(compact('html'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         return view('books.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $validation = $request->validate(
+                    [
+                        'title' => 'required|unique:books,title',
+                        'author_id' => 'required|exists:authors,id',
+                        'amount' => 'required|numeric',
+                        'cover' => 'image|max:2048',
+                    ]
+                    );
+        $book = Book::create($request->except('cover'));
+
+        // isi field cover
+        if($request->hasFile('cover')){
+            // get file
+            $uploaded_cover = $request->file('cover');
+            // get extension
+            $file_extension = $uploaded_cover->getClientOriginalExtension();
+            // filename
+            $filename = md5(time()).'.'.$file_extension;
+            // save to img folder
+            $destinationPath = public_path().DIRECTORY_SEPARATOR.'img';
+            $uploaded_cover->move($destinationPath,$filename);
+
+            // isi db
+            $book->cover = $filename;
+            $book->save();
+        }
+
+        session()->flash('success','Buku berhasil ditambahkan');
+
+        return redirect()->route('books.index');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function edit($id)
     {
-        //
+        $book = Book::find($id);
+        return view('books.edit')->with(compact('book'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
-        //
+        $book = Book::find($id);
+        $book->update($request->all());
+
+        if($request->hasFile('cover')){
+            // get file
+            $uploaded_cover = $request->file('cover');
+            // get extension
+            $file_extension = $uploaded_cover->getClientOriginalExtension();
+            // filename
+            $filename = md5(time()).'.'.$file_extension;
+            // save to img folder
+            $destinationPath = public_path().DIRECTORY_SEPARATOR.'img';
+            $uploaded_cover->move($destinationPath,$filename);
+
+            if($book->cover){
+                $old_cover = $book->cover;
+                $filePath = public_path().DIRECTORY_SEPARATOR.'img'.
+                            DIRECTORY_SEPARATOR.$old_cover;
+
+                File::delete($filePath);
+            }
+
+            // isi db
+            $book->cover = $filename;
+            $book->save();
+        }
+
+        session()->flash('success','Buku berhasil diubah');
+
+        return redirect()->route('books.index');
+
+      
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-        //
+       $book = Book::find($id);
+       $book_title = $book->title;
+
+       if($book->cover){
+            $filename = $book->cover;
+            $filepath = public_path().DIRECTORY_SEPARATOR.'img'.
+                        DIRECTORY_SEPARATOR.$filename;
+
+            try {
+                File::delete($filepath);
+            }catch(FileNotFoundException $e){
+
+            }
+       }
+
+       $book->delete();
+
+       session()->flash('success','Berhasil menghapus buku '.$book_title);
+
+       return redirect()->route('books.index');
+    }
+
+    public function borrow($id)
+    {
+        try {
+            $book = Book::findOrFail($id);
+
+            BorrowLog::create([
+                'user_id' => auth()->user()->id,
+                'book_id' => $book->id,
+            ]);
+
+            session()->flash('success','Berhasil meminjam buku '.$book->title);
+        }catch(ModelNotFoundException $e){
+            session()->flash('fail','Buku tidak ditemukan');
+
+        }
+
+        return redirect('/');
     }
 }

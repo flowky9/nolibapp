@@ -15,7 +15,8 @@
 					</div>
 					<div class="panel-body">
 
-						{!! Form::open(['route'=>['books.store'],'files'=>'true','class'=>'form-horizontal']) !!}
+						{!! Form::model($book,['route'=>['books.update',$book->id],
+						'method'=>'put','files'=>'true','class'=>'form-horizontal']) !!}
 							@include('books._form')
 						{!! Form::close() !!}
 					</div>

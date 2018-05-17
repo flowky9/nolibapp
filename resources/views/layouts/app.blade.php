@@ -14,6 +14,8 @@
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
     <!-- <link href="{{ asset('css/jquery.dataTables.css') }}" rel="stylesheet"> -->
     <link href="{{ asset('css/dataTables.bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/selectize.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/selectize.bootstrap3.css') }}" rel="stylesheet">
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 </head>
 <body>
@@ -85,11 +87,15 @@
     </div>
 
     <!-- Scripts -->
-
-    <!-- <script src="{{ asset('js/jquery-3.3.1.min.js') }}"></script> -->
-    <script src="{{ asset('js/app.js') }}"></script>
+    @if(Request::is('*/books/edit') || Request::is('*/books/create'))
+        <script src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
+    @else
+        <script src="{{ asset('js/app.js') }}"></script>
+    @endif
+    
     <script src="{{ asset('js/jquery.dataTables.js') }}"></script>
     <script src="{{ asset('js/dataTables.bootstrap.js') }}"></script>
+    <script src="{{ asset('js/selectize.min.js') }}"></script>
     <script src="{{ asset('js/custom.js') }}"></script>
     @stack('scripts')
 </body>

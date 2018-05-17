@@ -11,9 +11,13 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'GuestController@index');
+
+Route::get('books/{book}/borrow',[
+	'middleware' => ['auth','role:member'],
+	'as' => 'guest.books.borrow',
+	'uses' => 'BookController@borrow'
+]);
 
 Auth::routes();
 

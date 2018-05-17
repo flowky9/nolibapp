@@ -8,7 +8,7 @@
 <div class="form-group{{ $errors->has('author_id') ? ' has-error' : '' }}">
 	{!! Form::label('author_id', 'Penulis', ['class'=>'col-md-2 control-label']) !!}
 	<div class="col-md-4">
-		{!! Form::select('author_id', [''=>'']+App\Author::pluck('name','id')->all(),null, ['class'=>'form-control']) !!}
+		{!! Form::select('author_id', [''=>'']+App\Author::pluck('name','id')->all(),null, ['class'=>'form-control js-selectize']) !!}
 		{!! $errors->first('author_id', '<p class="help-block">:message</p>') !!}
 	</div>
 </div>
@@ -25,6 +25,14 @@
 	<div class="col-md-4">
 		{!! Form::file('cover') !!}
 		{!! $errors->first('cover', '<p class="help-block">:message</p>') !!}
+	</div>
+</div>
+
+<div class="form-group">
+	<div class="col-md-4 col-md-offset-2">
+		@if( isset($book) && $book->cover)
+			<img src="{{ asset('img/'.$book->cover) }}" width="100" alt="">
+		@endif
 	</div>
 </div>
 
