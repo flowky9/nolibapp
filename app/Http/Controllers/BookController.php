@@ -21,6 +21,9 @@ class BookController extends Controller
         if($request->ajax()){
             $books = Book::with('author');
             return DataTables::of($books)
+                    ->addColumn('stock',function($books){
+                        return $books->stock;
+                    })
                     ->addColumn('action',function($books){
                         return view('datatables._action',[
                             'model' => $books,
@@ -34,6 +37,7 @@ class BookController extends Controller
         $html = $htmlBuilder
                 ->addColumn(['data'=>'title','name'=>'title','title'=>'Judul'])
                 ->addColumn(['data'=>'amount','name'=>'amount','title'=>'Jumlah'])
+                ->addColumn(['data'=>'stock','name'=>'stock','title'=>'Stock','searcable'=>false,'orderable'=>false])
                 ->addColumn(['data'=>'author.name','name'=>'author.name','title'=>'Penulis'])
                 ->addColumn(['data'=>'action','name'=>'action','title'=>'Aksi','searcable'=>false,'orderable'=>false]);
 
@@ -96,6 +100,8 @@ class BookController extends Controller
         $book = Book::find($id);
         $book->update($request->all());
 
+        if(!$book->update($request->all())) return redirect()->back();
+
         if($request->hasFile('cover')){
             // get file
             $uploaded_cover = $request->file('cover');
@@ -131,6 +137,10 @@ class BookController extends Controller
     {
        $book = Book::find($id);
        $book_title = $book->title;
+
+       if(!$book->delete()){
+            return redirect()->back();
+       }
 
        if($book->cover){
             $filename = $book->cover;

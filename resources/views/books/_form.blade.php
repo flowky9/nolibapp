@@ -16,6 +16,9 @@
 	{!! Form::label('amount', 'Jumlah', ['class'=>'col-md-2 control-label']) !!}
 	<div class="col-md-4">
 		{!! Form::number('amount', null, ['class'=>'form-control','min'=>1]) !!}
+			@if (isset($book))
+				<p class="help-block">{{ $book->borrowed }} buku sedang dipinjam</p>
+			@endif
 		{!! $errors->first('amount', '<p class="help-block">:message</p>') !!}
 	</div>
 </div>

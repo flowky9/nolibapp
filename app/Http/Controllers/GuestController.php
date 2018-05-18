@@ -17,6 +17,9 @@ class GuestController extends Controller
         if($request->ajax()){
             $books = Book::with('author');
             return DataTables::of($books)
+            		->addColumn('stock',function($books){
+                        return $books->stock;
+                    })
                     ->addColumn('action',function($books){
                         if(Laratrust::hasRole('admin')) return '<a class="btn btn-xs btn-primary disabled" href="#">Pinjam</a>';
                         return '<a class="btn btn-xs btn-primary" href="'.route('guest.books.borrow',$books->id).'">Pinjam</a>';
@@ -26,7 +29,7 @@ class GuestController extends Controller
 
         $html = $htmlBuilder
                 ->addColumn(['data'=>'title','name'=>'title','title'=>'Judul'])
-                ->addColumn(['data'=>'amount','name'=>'amount','title'=>'Jumlah'])
+                ->addColumn(['data'=>'stock','name'=>'stock','title'=>'stock'])
                 ->addColumn(['data'=>'author.name','name'=>'author.name','title'=>'Penulis'])
                 ->addColumn(['data'=>'action','name'=>'action','title'=>'Aksi','searcable'=>false,'orderable'=>false]);
 

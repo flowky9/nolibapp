@@ -34,6 +34,9 @@ class User extends Authenticatable
 
     public function borrow(Book $book)
     {
+        if($book->stock < 1){
+            throw new BookException("Buku $book->title tidak tersedia");
+        }
         // cek apakah buku sedang di pinjam user
         if($this->borrowLogs()->where('book_id',$book->id)->where('is_returned',0)->count() > 0){
             throw new BookException("Buku $book->title sedang anda pinjam");

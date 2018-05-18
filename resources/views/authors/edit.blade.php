@@ -14,7 +14,6 @@
 						<h2 class="panel-title">Tambah Penulis</h2>
 					</div>
 					<div class="panel-body">
-
 						{!! Form::model($author,['route'=>['authors.update',$author->id],'method'=>'put','class'=>'form-horizontal']) !!}
 							@include('authors._form')
 						{!! Form::close() !!}
