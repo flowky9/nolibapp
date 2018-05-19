@@ -28,6 +28,7 @@ class UserSeeder extends Seeder
         				'phone_number' => '08787788920',
         				'password' => bcrypt('password')
         			]);
+        $userAdmin->is_verified = 1;
         $userAdmin->attachRole($adminRole);
 
         $memberAdmin = User::create([
@@ -36,6 +37,7 @@ class UserSeeder extends Seeder
         				'phone_number' => '08787788921',
         				'password' => bcrypt('password')
         			]);
+        $memberAdmin->is_verified = 1;
         $memberAdmin->attachRole($memberRole);
     }
 }

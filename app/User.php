@@ -8,6 +8,7 @@ use Laratrust\Traits\LaratrustUserTrait;
 use App\Book;
 use App\BorrowLog;
 use App\Exceptions\BookException;
+use Mail;
 
 class User extends Authenticatable
 {
@@ -32,6 +33,8 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    protected $casts = ['is_verified'=>'boolean'];
+
     public function borrow(Book $book)
     {
         if($book->stock < 1){
@@ -54,5 +57,33 @@ class User extends Authenticatable
     public function borrowLogs()
     {
         return $this->hasMany('App\BorrowLog');
+    }
+
+    public function genereateVerificationToken()
+    {
+        $token = $this->verification_token;
+        if(!$token){
+            $token = str_random(40);
+            $user = $this;
+            $user->verification_token = $token;
+            $user->save();
+        }
+
+        return $token;
+    }
+
+    public function sendVerification()
+    {
+        $token = $this->genereateVerificationToken();
+        $user = $this;
+        Mail::send('auth.emails.verification',compact('user','token'),function($m) use ($user){
+            $m->to($user->email,$user->name)->subject('Verifikasi akun NoLibApp');
+        });
+    }
+
+    public function verify(){
+        $this->is_verified = 1;
+        $this->verification_token = null;
+        $this->save();
     }
 }

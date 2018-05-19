@@ -7,6 +7,8 @@ use App\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RegisterController extends Controller
 {
@@ -38,6 +40,7 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+        $this->middleware('user-should-verified');
     }
 
     /**
@@ -74,7 +77,35 @@ class RegisterController extends Controller
 
         $role = Role::where('name','member')->first();
         $user->attachRole($role);
+        $user->sendVerification();
 
         return $user;
+    }
+
+    public function verify(Request $request, $token)
+    {
+        $email = $request->get('email');
+        $user = User::where('verification_token',$token)->where('email',$email)->first();
+
+        if($user){
+            $user->verify();
+            session()->flash('success','Berhasil di aktifkan');
+
+            Auth::login($user);
+            return redirect('/home');
+        }else{
+            return redirect('/');
+        }
+    }
+
+    public function sendVerification(Request $request)
+    {
+        $user = User::where('email',$request->get('email'))->first();
+        if($user && !$user->is_verified){
+            $user->sendVerification();
+            session()->flash('success','Silahkan klik link aktivasi di email anda');
+        }
+
+        return redirect('/login');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Request;
 
 class Request extends FormRequest
 {
@@ -13,7 +14,11 @@ class Request extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        if(Request::is('*/verify/*')){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /**
